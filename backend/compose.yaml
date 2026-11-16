@@ -1,9 +1,19 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:17'
+    container_name: avaliacoes-postgres
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_DB=avaliacoes_db'
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
     ports:
-      - '5432'
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../database/schema.sql:/docker-entrypoint-initdb.d/01.schema.sql
+      # Descomente a linha abaixo assim que criar o arquivo carga.sql:
+      # - ../../database/carga.sql:/docker-entrypoint-initdb.d/02-carga.sql
+
+volumes:
+  postgres_data:
+  
