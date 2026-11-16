@@ -1,6 +1,6 @@
 package uel.br.model;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,7 +27,7 @@ public class Avaliacao {
     private String descricao;
 
     @NotNull 
-    private Date data;
+    private LocalDate data;
 
     @NotNull
     private LocalTime hora_inicio;
