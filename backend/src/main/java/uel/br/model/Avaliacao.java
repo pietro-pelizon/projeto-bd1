@@ -1,9 +1,9 @@
 package uel.br.model;
 
 import java.sql.Date;
-import java.sql.Timestamp;
-
+import java.time.LocalTime;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,13 +26,13 @@ public class Avaliacao {
     @Size(max = 300)
     private String descricao;
 
-    @NotBlank
+    @NotNull 
     private Date data;
 
-    @NotBlank 
-    private Timestamp hora_inicio;
+    @NotNull
+    private LocalTime hora_inicio;
 
-    @NotBlank
-    private Timestamp hora_fim;
+    @NotNull
+    private LocalTime hora_fim;
 
 }
