@@ -4,7 +4,7 @@
 ## Integrantes
 Nome: Pietro Fernando Pelizon, RA: 202500560670
 
-Nome: Kenai Bazani Silva, RA: 2025..
+Nome: Kenai Silva Bazani, RA: 202500560181
 
 ## Natureza do sistema
  Avaliação de aprendizagem(provas, simulados, quizzes)
