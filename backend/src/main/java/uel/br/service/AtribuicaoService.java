@@ -37,8 +37,8 @@ public class AtribuicaoService {
             throw new IllegalArgumentException("Este usuário já possui atribuição para esta avaliação.");
         }
 
-        if (atribuicao.getStatus() == null || atribuicao.getStatus().isBlank()) {
-            atribuicao.setStatus("PENDENTE");
+        if(!atribuicao.getStatus().equals("CONCLUIDO") && !atribuicao.getStatus().equals("EM_ANDAMENTO") && !atribuicao.getStatus().equals("NAO_INICIADO")) {
+            throw new IllegalArgumentException("O status não é válido. Os status válidos são: CONCLUIDO, EM_ANDAMENTO e NAO_INICIADO.");
         }
 
         dao.inserir(atribuicao);
@@ -57,6 +57,10 @@ public class AtribuicaoService {
     public void atualizar(Long idUsuario, Long idAvaliacao, Atribuicao atribuicao) {
         atribuicao.setId_usuario(idUsuario);
         atribuicao.setId_avaliacao(idAvaliacao);
+
+        if(!atribuicao.getStatus().equals("CONCLUIDO") && !atribuicao.getStatus().equals("EM_ANDAMENTO") && !atribuicao.getStatus().equals("NAO_INICIADO")) {
+            throw new IllegalArgumentException("O status não é válido. Os status válidos são: CONCLUIDO, EM_ANDAMENTO e NAO_INICIADO.");
+        }
 
         int linhasAfetadas = dao.atualizar(atribuicao);
         if (linhasAfetadas == 0) {
