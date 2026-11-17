@@ -16,7 +16,7 @@ import lombok.Setter;
 public class Usuario {
     static final String REGEX_EMAIL = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)+$";
 
-    Long id;
+    private Long id;
 
     @NotBlank 
     @Pattern(regexp = REGEX_EMAIL)
