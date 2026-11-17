@@ -31,7 +31,7 @@ public class UsuarioDao {
     }
 
     public List<Usuario> listarTodos(){
-        String sql = "SELECT id, email, nome, senha FROM usuario ORDER BY nome";
+        String sql = "SELECT id_usuario, email, nome, senha FROM usuario ORDER BY nome";
         return jdbcTemplate.query(sql, rowMapper);
     }
 
