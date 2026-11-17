@@ -20,3 +20,5 @@ TODO: Adicionar instruções de execução do programa após clonar o repositór
     - Imagem da tela com o gráfico renderizado
     - código SQL utilizado
     - Listar comandos que estão na seção 5 e foram utilizados
+    - Alterar DER e Esquema relacional para incluir ID_usuario como PK e email como chave candidata em user
+    - Alterar DER e Esquema relacional para incluir titulo como chave candidata em avaliação
