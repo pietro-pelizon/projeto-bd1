@@ -17,6 +17,11 @@ public class AvaliacaoService {
         this.dao = dao;
     }
 
+    public Avaliacao buscarPorId(Long id) {
+    return dao.buscarPorId(id)
+        .orElseThrow(() -> new IllegalArgumentException("Avaliação não encontrada."));
+}
+
     // @Transactional garante a integridade dos dados caso alguma operação falhe
     @Transactional
     public void cadastrar(Avaliacao avaliacao) {
