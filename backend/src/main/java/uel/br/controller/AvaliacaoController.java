@@ -37,6 +37,11 @@ public class AvaliacaoController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<Avaliacao> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
+    }
+
     @GetMapping
     public ResponseEntity<List<Avaliacao>> listarTodos() {
         return ResponseEntity.ok(service.listar());
