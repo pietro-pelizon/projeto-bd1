@@ -33,9 +33,9 @@ FROM questao q
 JOIN resposta r ON r.id_questao = q.id_questao
 WHERE r.nota IS NOT NULL
 GROUP BY q.id_questao, q.enunciado
-ORDER BY media_nota ASC;
+ORDER BY media_nota ASC, total_respostas DESC;
 
--- Relatório 3: Questão com o maior número de erros
+-- Relatório 3: Questão de múltipla escolha com o maior número de erros
 SELECT 
     q.id_questao,
     q.enunciado,
@@ -48,5 +48,5 @@ SELECT
     JOIN alternativa a
     ON r.letra_marcada = a.letra AND r.id_questao = a.id_questao
     GROUP BY q.id_questao, q.enunciado
-    ORDER BY total_erros DESC;
+    ORDER BY total_erros DESC, total_respostas DESC;
     
