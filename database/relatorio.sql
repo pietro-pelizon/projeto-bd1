@@ -21,3 +21,32 @@ FROM usuario u
 JOIN notas_avaliacao na ON na.id_usuario = u.id_usuario
 GROUP BY u.id_usuario, u.nome, u.email
 ORDER BY media_geral DESC, u.nome ASC;
+
+
+-- Relatório 2: Questão mais difícil (com menor média entre aqueles que a responderam)
+SELECT
+    q.id_questao,
+    q.enunciado,
+    ROUND(AVG(r.nota), 2) AS media_nota,
+    COUNT(r.id_usuario) AS total_respostas
+FROM questao q
+JOIN resposta r ON r.id_questao = q.id_questao
+WHERE r.nota IS NOT NULL
+GROUP BY q.id_questao, q.enunciado
+ORDER BY media_nota ASC;
+
+-- Relatório 3: Questão com o maior número de erros
+SELECT 
+    q.id_questao,
+    q.enunciado,
+    COUNT(CASE WHEN a.correta = FALSE THEN 1 END) AS total_erros,
+    COUNT(*) AS total_respostas,
+    ROUND((COUNT(CASE WHEN a.correta = FALSE THEN 1 END) * 100.0) / NULLIF(COUNT(*), 0), 2) AS taxa_erro
+    FROM questao q 
+    JOIN resposta r
+    ON q.id_questao = r.id_questao
+    JOIN alternativa a
+    ON r.letra_marcada = a.letra AND r.id_questao = a.id_questao
+    GROUP BY q.id_questao, q.enunciado
+    ORDER BY total_erros DESC;
+    
