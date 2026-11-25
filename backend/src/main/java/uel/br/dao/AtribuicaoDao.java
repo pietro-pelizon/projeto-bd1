@@ -18,8 +18,8 @@ public class AtribuicaoDao {
     }
 
     private final RowMapper<Atribuicao> rowMapper = (rs, rowNum) -> new Atribuicao(
+        rs.getLong("id_ausuario"),
         rs.getLong("id_avaliacao"),
-        rs.getLong("id_usuario"),
         rs.getString("status")
     );
 
