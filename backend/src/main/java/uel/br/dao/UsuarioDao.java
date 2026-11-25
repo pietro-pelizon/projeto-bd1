@@ -22,16 +22,17 @@ public class UsuarioDao {
         rs.getLong("id_usuario"),
         rs.getString("email"),
         rs.getString("nome"),
-        rs.getString("senha")
+        rs.getString("senha"),
+        rs.getString("tipo")
     );
 
     public void inserir(Usuario usuario){
-        String sql = "INSERT INTO usuario (email, nome, senha) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, usuario.getEmail(), usuario.getNome(), usuario.getSenha());
+        String sql = "INSERT INTO usuario (email, nome, senha, tipo) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, usuario.getEmail(), usuario.getNome(), usuario.getSenha(), usuario.getTipo());
     }
 
     public List<Usuario> listarTodos(){
-        String sql = "SELECT id_usuario, email, nome, senha FROM usuario ORDER BY nome";
+        String sql = "SELECT id_usuario, email, nome, senha, tipo FROM usuario ORDER BY nome";
         return jdbcTemplate.query(sql, rowMapper);
     }
 
@@ -41,21 +42,21 @@ public class UsuarioDao {
     }
 
     public Optional<Usuario> buscarPorId(Long id){
-        String sql = "SELECT id_usuario, email, nome, senha FROM usuario WHERE id_usuario = ?";
+        String sql = "SELECT id_usuario, email, nome, senha, tipo FROM usuario WHERE id_usuario = ?";
         List<Usuario> resultados = jdbcTemplate.query(sql, rowMapper, id);
         return resultados.stream().findFirst();
     }
 
 
     public Optional<Usuario> buscarPorEmail(String email) {
-        String sql = "SELECT id_usuario, email, nome, senha FROM usuario WHERE email = ?";
+        String sql = "SELECT id_usuario, email, nome, senha, tipo FROM usuario WHERE email = ?";
         List<Usuario> resultados = jdbcTemplate.query(sql, rowMapper, email);
         return resultados.stream().findFirst();
     }
 
 
     public int atualizar(Usuario usuario){
-        String sql = "UPDATE usuario SET email = ?, nome = ?, senha = ? WHERE id_usuario = ?";
-        return jdbcTemplate.update(sql, usuario.getEmail(), usuario.getNome(), usuario.getSenha(), usuario.getId()); 
+        String sql = "UPDATE usuario SET email = ?, nome = ?, senha = ?, tipo = ? WHERE id_usuario = ?";
+        return jdbcTemplate.update(sql, usuario.getEmail(), usuario.getNome(), usuario.getSenha(), usuario.getTipo(), usuario.getId()); 
     }
 }
