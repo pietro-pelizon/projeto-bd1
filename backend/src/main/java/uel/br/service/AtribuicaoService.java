@@ -9,6 +9,7 @@ import uel.br.dao.AtribuicaoDao;
 import uel.br.dao.AvaliacaoDao;
 import uel.br.dao.UsuarioDao;
 import uel.br.model.Atribuicao;
+import uel.br.model.Usuario;
 
 @Service
 public class AtribuicaoService {
@@ -25,8 +26,11 @@ public class AtribuicaoService {
 
     @Transactional
     public void criar(Atribuicao atribuicao) {
-        if (usuarioDao.buscarPorId(atribuicao.getId_usuario()).isEmpty()) {
-            throw new IllegalArgumentException("Usuário não encontrado.");
+    
+        Usuario usuario = usuarioDao.buscarPorId(atribuicao.getId_usuario()).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+        
+        if (!"ALUNO".equals(usuario.getTipo())) {
+            throw new IllegalArgumentException("Apenas usuários do tipo ALUNO podem receber avaliações.");
         }
 
         if (avaliacaoDao.buscarPorId(atribuicao.getId_avaliacao()).isEmpty()) {
