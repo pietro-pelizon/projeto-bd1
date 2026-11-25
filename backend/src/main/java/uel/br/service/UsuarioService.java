@@ -18,6 +18,9 @@ public class UsuarioService {
     }
 
     private void validarTipo(Usuario usuario) {
+        if (usuario.getTipo() == null || usuario.getTipo().isBlank()) {
+        throw new IllegalArgumentException("Tipo inválido. Use ALUNO ou PROFESSOR.");
+    }
         String tipoNormalizado = usuario.getTipo().trim().toUpperCase();
         if (!TIPOS_VALIDOS.contains(tipoNormalizado)) {
             throw new IllegalArgumentException("Tipo inválido. Use ALUNO ou PROFESSOR.");
@@ -39,6 +42,11 @@ public class UsuarioService {
     @Transactional
     public void atualizar(Long id, Usuario novosDados) {
         validarTipo(novosDados);
+
+        var existente = dao.buscarPorEmail(novosDados.getEmail());
+        if (existente.isPresent() && !existente.get().getId().equals(id)) {
+        throw new IllegalArgumentException("E-mail já registrado em outro usuário.");
+    }
 
         novosDados.setId(id);
         int linhasAfetadas = dao.atualizar(novosDados);
