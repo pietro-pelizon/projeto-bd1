@@ -31,4 +31,8 @@ public class Usuario {
     @Size(max = 64)
     private String senha;
 
+    @NotBlank
+    @Size(max = 20)
+    private String tipo;
+
 }
