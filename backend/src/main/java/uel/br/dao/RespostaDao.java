@@ -8,6 +8,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import uel.br.dto.ItemProvaDto;
+import uel.br.dto.NotaTotalDto;
 import uel.br.model.Resposta;
 
 @Repository
@@ -75,16 +77,63 @@ public class RespostaDao {
         return jdbcTemplate.update(sql, idUsuario, idAvaliacao, idQuestao);
     }
 
-    public boolean existeAtribuicao(Long idUsuario, Long idAvaliacao) {
-        Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM atribuicao WHERE id_usuario = ? AND id_avaliacao = ?",
-            Integer.class, idUsuario, idAvaliacao);
-        return count != null && count > 0;
+    // FOR UPDATE trava a atribuição até o fim da transação
+    public Optional<String> buscarStatusAtribuicao(Long idUsuario, Long idAvaliacao) {
+        String sql = "SELECT status FROM atribuicao WHERE id_usuario = ? AND id_avaliacao = ? FOR UPDATE";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getString("status"), idUsuario, idAvaliacao)
+            .stream().findFirst();
     }
 
-    public boolean existeQuestao(Long idQuestao) {
-        Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM questao WHERE id_questao = ?", Integer.class, idQuestao);
-        return count != null && count > 0;
+    // Vazio quando a questão não faz parte da avaliação
+    public Optional<ItemProvaDto> buscarItemProva(Long idAvaliacao, Long idQuestao) {
+        String sql = """
+            SELECT aq.valor, (qd.id_questao IS NOT NULL) AS discursiva
+            FROM avaliacao_questao aq
+            LEFT JOIN questao_discursiva qd ON qd.id_questao = aq.id_questao
+            WHERE aq.id_avaliacao = ? AND aq.id_questao = ?
+            """;
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new ItemProvaDto(rs.getBigDecimal("valor"), rs.getBoolean("discursiva")),
+                idAvaliacao, idQuestao)
+            .stream().findFirst();
+    }
+
+    // Vazio quando a letra não existe na questão; senão, diz se é a correta
+    public Optional<Boolean> buscarGabarito(Long idQuestao, String letra) {
+        String sql = "SELECT correta FROM alternativa WHERE id_questao = ? AND letra = ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getBoolean("correta"), idQuestao, letra)
+            .stream().findFirst();
+    }
+
+    public void marcarEmAndamento(Long idUsuario, Long idAvaliacao) {
+        String sql = "UPDATE atribuicao SET status = 'EM_ANDAMENTO' WHERE id_usuario = ? AND id_avaliacao = ? AND status = 'NAO_INICIADO'";
+        jdbcTemplate.update(sql, idUsuario, idAvaliacao);
+    }
+
+    public int atualizarNota(Long idUsuario, Long idAvaliacao, Long idQuestao, BigDecimal nota) {
+        String sql = "UPDATE resposta SET nota = ? WHERE id_usuario = ? AND id_avaliacao = ? AND id_questao = ?";
+        return jdbcTemplate.update(sql, nota, idUsuario, idAvaliacao, idQuestao);
+    }
+
+    public NotaTotalDto calcularNotaTotal(Long idUsuario, Long idAvaliacao) {
+        String sql = """
+            SELECT
+                COALESCE(SUM(r.nota), 0) AS nota_total,
+                COALESCE(SUM(aq.valor), 0) AS valor_total,
+                COUNT(CASE WHEN r.id_usuario IS NOT NULL AND r.nota IS NULL THEN 1 END) AS pendentes
+            FROM avaliacao_questao aq
+            LEFT JOIN resposta r
+                   ON r.id_avaliacao = aq.id_avaliacao
+                  AND r.id_questao = aq.id_questao
+                  AND r.id_usuario = ?
+            WHERE aq.id_avaliacao = ?
+            """;
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> new NotaTotalDto(
+                    rs.getBigDecimal("nota_total"),
+                    rs.getBigDecimal("valor_total"),
+                    rs.getLong("pendentes")),
+                idUsuario, idAvaliacao)
+            .get(0);
     }
 }
