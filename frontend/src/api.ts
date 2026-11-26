@@ -98,6 +98,11 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(d),
       }),
+    corrigir: (idU: number, idAv: number, idQ: number, nota: number) =>
+      request<Resposta>(`/respostas/${idU}/${idAv}/${idQ}/nota`, {
+        method: 'PUT',
+        body: JSON.stringify({ nota }),
+      }),
     excluir: (idU: number, idAv: number, idQ: number) =>
       request<void>(`/respostas/${idU}/${idAv}/${idQ}`, { method: 'DELETE' }),
   },
