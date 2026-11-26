@@ -106,24 +106,29 @@ export default function AtribuicoesRespostasScreen() {
       return;
     }
     setErro(null);
+    const { id_usuario, id_avaliacao } = selecionada;
     const payload: Resposta = {
-      id_usuario: selecionada.id_usuario,
-      id_avaliacao: selecionada.id_avaliacao,
+      id_usuario,
+      id_avaliacao,
       id_questao: idQuestaoResp,
       letra_marcada: letraMarcada.trim() ? letraMarcada.trim().toUpperCase() : null,
       texto_resposta: textoResposta.trim() ? textoResposta.trim() : null,
-      nota: nota.trim() ? Number(nota.replace(',', '.')) : null,
     };
+    // Nota preenchida ao editar = correção do professor (só discursivas)
+    const ehCorrecao = editandoResp && nota.trim() !== '';
 
     try {
-      if (editandoResp) {
-        await api.respostas.atualizar(
-          selecionada.id_usuario,
-          selecionada.id_avaliacao,
+      if (ehCorrecao) {
+        await api.respostas.corrigir(
+          id_usuario,
+          id_avaliacao,
           idQuestaoResp,
-          payload
+          Number(nota.replace(',', '.'))
         );
-        setSucesso('Resposta atualizada/corrigida!');
+        setSucesso('Resposta corrigida!');
+      } else if (editandoResp) {
+        await api.respostas.atualizar(id_usuario, id_avaliacao, idQuestaoResp, payload);
+        setSucesso('Resposta atualizada!');
       } else {
         await api.respostas.criar(payload);
         setSucesso('Resposta registrada!');
@@ -132,7 +137,8 @@ export default function AtribuicoesRespostasScreen() {
       setTextoResposta('');
       setNota('');
       setEditandoResp(false);
-      carregarRespostas(selecionada.id_usuario, selecionada.id_avaliacao);
+      carregarRespostas(id_usuario, id_avaliacao);
+      carregar(); // o status pode ter mudado
     } catch (e: any) {
       setErro(e.message);
     }
@@ -266,12 +272,12 @@ export default function AtribuicoesRespostasScreen() {
               />
             </View>
             <View style={{ width: 130 }}>
-              <Text style={styles.label}>Nota (0 a 10)</Text>
+              <Text style={styles.label}>Nota (professor)</Text>
               <TextInput
                 style={styles.input}
                 value={nota}
                 onChangeText={setNota}
-                placeholder="Ex: 8.5"
+                placeholder="Só discursivas"
               />
             </View>
           </View>
@@ -326,7 +332,8 @@ export default function AtribuicoesRespostasScreen() {
                       setIdQuestaoResp(r.id_questao);
                       setLetraMarcada(r.letra_marcada || '');
                       setTextoResposta(r.texto_resposta || '');
-                      setNota(r.nota !== null && r.nota !== undefined ? String(r.nota) : '');
+                      const discursiva = questoes.find((q) => q.id === r.id_questao)?.tipo === 'DISCURSIVA';
+                      setNota(discursiva && r.nota != null ? String(r.nota) : '');
                       setEditandoResp(true);
                     }}
                   />
