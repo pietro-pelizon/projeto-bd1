@@ -93,6 +93,5 @@ CREATE TABLE resposta (
     CONSTRAINT pk_resposta PRIMARY KEY (id_usuario, id_avaliacao, id_questao),
     CONSTRAINT fk_resposta_atribuicao FOREIGN KEY (id_usuario, id_avaliacao)
         REFERENCES atribuicao(id_usuario, id_avaliacao) ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT fk_resposta_avaliacao_questao FOREIGN KEY (id_avaliacao, id_questao)
-        REFERENCES avaliacao_questao(id_avaliacao, id_questao) ON DELETE NO ACTION
+    CONSTRAINT fk_resposta_questao FOREIGN KEY (id_questao) REFERENCES questao(id_questao) ON DELETE RESTRICT
 );

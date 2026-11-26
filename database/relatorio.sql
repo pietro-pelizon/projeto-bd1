@@ -19,6 +19,7 @@ SELECT
     COUNT(na.id_avaliacao) AS avaliacoes_concluidas
 FROM usuario u
 JOIN notas_avaliacao na ON na.id_usuario = u.id_usuario
+WHERE u.tipo = 'ALUNO'
 GROUP BY u.id_usuario, u.nome, u.email
 ORDER BY media_geral DESC, u.nome ASC;
 
