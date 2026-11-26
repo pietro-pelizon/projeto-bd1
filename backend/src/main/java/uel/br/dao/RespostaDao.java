@@ -136,4 +136,11 @@ public class RespostaDao {
                 idUsuario, idAvaliacao)
             .get(0);
     }
+
+    public boolean existeQuestaoNaAvaliacao(Long idAvaliacao, Long idQuestao) {
+    Integer count = jdbcTemplate.queryForObject(
+        "SELECT COUNT(*) FROM avaliacao_questao WHERE id_avaliacao = ? AND id_questao = ?",
+        Integer.class, idAvaliacao, idQuestao);
+        return count != null && count > 0;
+    }
 }
