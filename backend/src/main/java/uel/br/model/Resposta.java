@@ -2,6 +2,8 @@ package uel.br.model;
 
 import java.math.BigDecimal;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -30,6 +32,7 @@ public class Resposta {
 
     private String letra_marcada;
 
-    @NotNull 
+    @DecimalMin("0.00")
+    @DecimalMax("10.00")
     private BigDecimal nota;
 }
