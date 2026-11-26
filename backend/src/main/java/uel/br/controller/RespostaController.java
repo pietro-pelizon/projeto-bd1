@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import uel.br.dto.CorrecaoDto;
+import uel.br.dto.NotaTotalDto;
 import uel.br.model.Resposta;
 import uel.br.service.RespostaService;
 
@@ -59,6 +61,22 @@ public class RespostaController {
             @PathVariable Long idQuestao,
             @RequestBody Resposta resposta) {
         return ResponseEntity.ok(service.atualizar(idUsuario, idAvaliacao, idQuestao, resposta));
+    }
+
+    @PutMapping("/{idUsuario}/{idAvaliacao}/{idQuestao}/nota")
+    public ResponseEntity<Resposta> corrigir(
+            @PathVariable Long idUsuario,
+            @PathVariable Long idAvaliacao,
+            @PathVariable Long idQuestao,
+            @RequestBody CorrecaoDto correcao) {
+        return ResponseEntity.ok(service.corrigir(idUsuario, idAvaliacao, idQuestao, correcao.nota()));
+    }
+
+    @GetMapping("/atribuicao/{idUsuario}/{idAvaliacao}/total")
+    public ResponseEntity<NotaTotalDto> notaTotal(
+            @PathVariable Long idUsuario,
+            @PathVariable Long idAvaliacao) {
+        return ResponseEntity.ok(service.calcularNotaTotal(idUsuario, idAvaliacao));
     }
 
     @DeleteMapping("/{idUsuario}/{idAvaliacao}/{idQuestao}")
