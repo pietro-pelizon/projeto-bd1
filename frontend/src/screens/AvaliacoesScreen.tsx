@@ -111,6 +111,10 @@ export default function AvaliacoesScreen() {
     });
   };
 
+  const somaValores = vinculos.reduce((acc, v) => acc + Number(v.valor), 0);
+  const restante = Math.max(0, 10 - somaValores);
+  const fmt = (n: number) => String(Math.round(n * 100) / 100).replace('.', ',');
+
   return (
     <View>
       <Banner erro={erro} sucesso={sucesso} onClose={() => { setErro(null); setSucesso(null); }} />
@@ -226,6 +230,31 @@ export default function AvaliacoesScreen() {
             Questões da Avaliação #{avSelecionada.id}: {avSelecionada.titulo}
           </Text>
 
+          <View style={[styles.rowBetween, { marginBottom: 6 }]}>
+            <Text style={styles.itemMeta}>Soma dos valores: {fmt(somaValores)} / 10</Text>
+            <View
+              style={[
+                styles.badge,
+                { backgroundColor: restante === 0 ? '#DCFCE7' : '#E0F2FE' },
+              ]}
+            >
+              <Text style={[styles.badgeTexto, { color: restante === 0 ? '#166534' : '#0369A1' }]}>
+                {restante === 0 ? 'Prova fechada em 10' : `Disponível: ${fmt(restante)}`}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.barraFundo}>
+            <View
+              style={[
+                styles.barraPreenchimento,
+                {
+                  width: `${Math.min(100, (somaValores / 10) * 100)}%`,
+                  backgroundColor: somaValores > 10 ? '#DC2626' : '#2563EB',
+                },
+              ]}
+            />
+          </View>
+
           <Text style={styles.label}>Escolha uma questão para vincular:</Text>
           <View style={[styles.row, { marginBottom: 8 }]}>
             {questoes.map((q) => (
@@ -243,7 +272,7 @@ export default function AvaliacoesScreen() {
               style={[styles.input, { width: 120 }]}
               value={valorQuestao}
               onChangeText={setValorQuestao}
-              placeholder="Valor (ex: 2.5)"
+              placeholder={`Valor (máx ${fmt(restante)})`}
             />
             <Botao titulo="Adicionar à Prova" onPress={adicionarQuestaoNaProva} />
           </View>
