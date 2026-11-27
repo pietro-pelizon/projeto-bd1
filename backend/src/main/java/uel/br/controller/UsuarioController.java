@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import uel.br.dto.LoginDto;
 import uel.br.model.Usuario;
 import uel.br.service.UsuarioService;
 
@@ -35,6 +36,13 @@ public class UsuarioController {
     public ResponseEntity<Void> criar(@Valid @RequestBody Usuario usuario){
         service.cadastrar(usuario);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginDto dto) {
+        return service.autenticar(dto.email(), dto.senha())
+            .<ResponseEntity<?>>map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("E-mail ou senha inválidos."));
     }
 
     @GetMapping
