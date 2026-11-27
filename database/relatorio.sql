@@ -42,12 +42,23 @@ SELECT
     q.enunciado,
     COUNT(CASE WHEN a.correta = FALSE THEN 1 END) AS total_erros,
     COUNT(*) AS total_respostas,
-    ROUND((COUNT(CASE WHEN a.correta = FALSE THEN 1 END) * 100.0) / NULLIF(COUNT(*), 0), 2) AS taxa_erro
-    FROM questao q 
-    JOIN resposta r
+    ROUND(
+        (COUNT(CASE WHEN a.correta = FALSE THEN 1 END) * 100.0)
+        / NULLIF(COUNT(*), 0), 2
+    ) AS taxa_erro
+FROM questao q 
+JOIN resposta r
     ON q.id_questao = r.id_questao
-    JOIN alternativa a
-    ON r.letra_marcada = a.letra AND r.id_questao = a.id_questao
-    GROUP BY q.id_questao, q.enunciado
-    ORDER BY total_erros DESC, total_respostas DESC;
-    
+JOIN alternativa a
+    ON r.letra_marcada = a.letra
+    AND r.id_questao = a.id_questao
+WHERE r.id_avaliacao IN (
+    SELECT av.id_avaliacao
+    FROM avaliacao av
+    WHERE av.data BETWEEN DATE '2026-01-01' AND DATE '2026-12-31'
+)
+AND LOWER(q.enunciado) LIKE LOWER('%')
+GROUP BY q.id_questao, q.enunciado
+HAVING COUNT(*) BETWEEN 1 AND 1000
+ORDER BY total_erros DESC, total_respostas DESC
+FETCH FIRST 10 ROWS ONLY;
