@@ -44,28 +44,28 @@ public class RelatorioDao {
     // Relatório 1: Média geral e total de avaliações concluídas por aluno
     public List<AlunoMediaGeralDto> listarMediaGeralPorAluno() {
         String sql = """
-                    WITH notas_avaliacao AS (
+                        WITH notas_avaliacao AS (
+                SELECT
+                    a.id_usuario,
+                    a.id_avaliacao,
+                    COALESCE(SUM(r.nota), 0) AS nota_prova
+                FROM atribuicao a
+                LEFT JOIN resposta r
+                       ON r.id_usuario = a.id_usuario
+                      AND r.id_avaliacao = a.id_avaliacao
+                WHERE a.status = 'CONCLUIDO'
+                GROUP BY a.id_usuario, a.id_avaliacao
+            )
             SELECT
-                a.id_usuario,
-                a.id_avaliacao,
-                COALESCE(SUM(r.nota), 0) AS nota_prova
-            FROM atribuicao a
-            LEFT JOIN resposta r
-                   ON r.id_usuario = a.id_usuario
-                  AND r.id_avaliacao = a.id_avaliacao
-            WHERE a.status = 'CONCLUIDO'
-            GROUP BY a.id_usuario, a.id_avaliacao
-        )
-        SELECT
-            u.nome,
-            u.email,
-            COALESCE(ROUND(AVG(na.nota_prova), 2), 0.0) AS media_geral,
-            COUNT(na.id_avaliacao) AS avaliacoes_concluidas
-        FROM usuario u
-        JOIN notas_avaliacao na ON na.id_usuario = u.id_usuario
-        WHERE u.tipo = 'ALUNO'
-        GROUP BY u.id_usuario, u.nome, u.email
-        ORDER BY media_geral DESC, u.nome ASC
+                u.nome,
+                u.email,
+                COALESCE(ROUND(AVG(na.nota_prova), 2), 0.0) AS media_geral,
+                COUNT(na.id_avaliacao) AS avaliacoes_concluidas
+            FROM usuario u
+            JOIN notas_avaliacao na ON na.id_usuario = u.id_usuario
+            WHERE u.tipo = 'ALUNO'
+            GROUP BY u.id_usuario, u.nome, u.email
+            ORDER BY media_geral DESC, u.nome ASC
             """;
         return jdbcTemplate.query(sql, alunoMediaGeralMapper);
     }
@@ -74,15 +74,15 @@ public class RelatorioDao {
     public List<QuestaoMaisDificilDto> listarQuestoesMaisDificeis() {
         String sql = """
             SELECT
-                q.id_questao,
-                q.enunciado,
-                ROUND(AVG(r.nota), 2) AS media_nota,
-                COUNT(r.id_usuario) AS total_respostas
-            FROM questao q
-            JOIN resposta r ON r.id_questao = q.id_questao
-            WHERE r.nota IS NOT NULL
-            GROUP BY q.id_questao, q.enunciado
-            ORDER BY media_nota ASC, total_respostas DESC
+            q.id_questao,
+            q.enunciado,
+            ROUND(AVG(r.nota), 2) AS media_nota,
+            COUNT(r.id_usuario) AS total_respostas
+        FROM questao q
+        JOIN resposta r ON r.id_questao = q.id_questao
+        WHERE r.nota IS NOT NULL
+        GROUP BY q.id_questao, q.enunciado
+        ORDER BY media_nota ASC, total_respostas DESC
             """;
         return jdbcTemplate.query(sql, questaoMaisDificilMapper);
     }
@@ -90,19 +90,31 @@ public class RelatorioDao {
     // Relatório 3: Questões objetivas com maior quantidade de respostas incorretas
     public List<QuestaoMaisErrosDto> listarQuestoesMaisErros() {
         String sql = """
-           SELECT 
+                  SELECT 
             q.id_questao,
             q.enunciado,
             COUNT(CASE WHEN a.correta = FALSE THEN 1 END) AS total_erros,
             COUNT(*) AS total_respostas,
-            ROUND((COUNT(CASE WHEN a.correta = FALSE THEN 1 END) * 100.0) / NULLIF(COUNT(*), 0), 2) AS taxa_erro
-            FROM questao q 
-            JOIN resposta r
+            ROUND(
+                (COUNT(CASE WHEN a.correta = FALSE THEN 1 END) * 100.0)
+                / NULLIF(COUNT(*), 0), 2
+            ) AS taxa_erro
+        FROM questao q 
+        JOIN resposta r
             ON q.id_questao = r.id_questao
-            JOIN alternativa a
-            ON r.letra_marcada = a.letra AND r.id_questao = a.id_questao
-            GROUP BY q.id_questao, q.enunciado
-            ORDER BY total_erros DESC, total_respostas DESC
+        JOIN alternativa a
+            ON r.letra_marcada = a.letra
+            AND r.id_questao = a.id_questao
+        WHERE r.id_avaliacao IN (
+            SELECT av.id_avaliacao
+            FROM avaliacao av
+            WHERE av.data BETWEEN DATE '2026-01-01' AND DATE '2026-12-31'
+        )
+        AND LOWER(q.enunciado) LIKE LOWER('%')
+        GROUP BY q.id_questao, q.enunciado
+        HAVING COUNT(*) BETWEEN 1 AND 1000
+        ORDER BY total_erros DESC, total_respostas DESC
+        FETCH FIRST 10 ROWS ONLY
             """;
         return jdbcTemplate.query(sql, questaoMaisErrosMapper);
     }
