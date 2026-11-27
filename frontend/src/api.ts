@@ -8,6 +8,7 @@ import type {
   QuestaoMaisErrosDto,
   Resposta,
   Usuario,
+  UsuarioSessao,
 } from './types';
 
 export const API_BASE_URL = 'http://localhost:8080';
@@ -38,6 +39,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const api = {
   usuarios: {
+    login: (email: string, senha: string) =>
+      request<UsuarioSessao>('/usuarios/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, senha }),
+      }),
     listar: () => request<Usuario[]>('/usuarios'),
     criar: (d: Usuario) => request<void>('/usuarios', { method: 'POST', body: JSON.stringify(d) }),
     atualizar: (id: number, d: Usuario) =>
@@ -111,4 +117,4 @@ export const api = {
     questoesDificeis: () => request<QuestaoMaisDificilDto[]>('/relatorios/questoes-dificeis'),
     questoesErros: () => request<QuestaoMaisErrosDto[]>('/relatorios/questoes-erros'),
   },
-};
+}

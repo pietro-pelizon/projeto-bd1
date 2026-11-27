@@ -8,6 +8,14 @@ export interface Usuario {
   tipo: string;
 }
 
+// Resposta do POST /usuarios/login (nunca traz a senha)
+export interface UsuarioSessao {
+  id: number;
+  nome: string;
+  email: string;
+  tipo: 'ALUNO' | 'PROFESSOR' | string;
+}
+
 export interface Alternativa {
   idQuestao?: number;
   letra: string;
