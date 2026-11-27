@@ -1,11 +1,13 @@
 package uel.br.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import uel.br.dao.UsuarioDao;
+import uel.br.dto.UsuarioSessaoDto;
 import uel.br.model.Usuario;
 
 @Service
@@ -53,6 +55,15 @@ public class UsuarioService {
         if (linhasAfetadas == 0) {
             throw new IllegalArgumentException("Usuário não encontrado.");
         }
+    }
+
+    public Optional<UsuarioSessaoDto> autenticar(String email, String senha) {
+        if (email == null || email.isBlank() || senha == null || senha.isEmpty()) {
+            return Optional.empty();
+        }
+        return dao.buscarPorEmail(email.trim())
+            .filter(u -> senha.equals(u.getSenha()))
+            .map(u -> new UsuarioSessaoDto(u.getId(), u.getNome(), u.getEmail(), u.getTipo()));
     }
 
     public List<Usuario> listar() {

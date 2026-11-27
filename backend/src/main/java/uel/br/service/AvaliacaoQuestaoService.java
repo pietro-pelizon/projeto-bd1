@@ -27,6 +27,17 @@ public class AvaliacaoQuestaoService {
         }
     }
 
+    // A soma dos valores de todas as questões de uma avaliação não pode passar de 10.
+    private void validarSoma(Long idAvaliacao, Long idQuestao, BigDecimal valor) {
+        BigDecimal outras = dao.somarValoresExceto(idAvaliacao, idQuestao);
+        if (outras.add(valor).compareTo(BigDecimal.TEN) > 0) {
+            BigDecimal disponivel = BigDecimal.TEN.subtract(outras).max(BigDecimal.ZERO);
+            throw new IllegalArgumentException(
+                "A soma dos valores das questões da avaliação não pode passar de 10. "
+                + "Valor disponível: " + disponivel.stripTrailingZeros().toPlainString() + ".");
+        }
+    }
+
     @Transactional
     public AvaliacaoQuestao criar(AvaliacaoQuestao aq) {
         if (aq.getId_avaliacao() == null || aq.getId_questao() == null) {
@@ -43,6 +54,9 @@ public class AvaliacaoQuestaoService {
         if (dao.buscarPorId(aq.getId_avaliacao(), aq.getId_questao()).isPresent()) {
             throw new IllegalArgumentException("Esta questão já está vinculada a esta avaliação.");
         }
+
+        dao.travarAvaliacao(aq.getId_avaliacao());
+        validarSoma(aq.getId_avaliacao(), aq.getId_questao(), aq.getValor());
 
         dao.inserir(aq);
         return aq;
@@ -66,6 +80,12 @@ public class AvaliacaoQuestaoService {
         aq.setId_avaliacao(idAvaliacao);
         aq.setId_questao(idQuestao);
         validarValor(aq.getValor());
+
+        if (dao.buscarPorId(idAvaliacao, idQuestao).isEmpty()) {
+            throw new IllegalArgumentException("Vínculo entre avaliação e questão não encontrado.");
+        }
+        dao.travarAvaliacao(idAvaliacao);
+        validarSoma(idAvaliacao, idQuestao, aq.getValor());
 
         int linhasAfetadas = dao.atualizar(aq);
         if (linhasAfetadas == 0) {

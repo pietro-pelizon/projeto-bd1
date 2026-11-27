@@ -1,5 +1,6 @@
 package uel.br.dao;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,5 +66,20 @@ public class AvaliacaoQuestaoDao {
         Integer count = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM questao WHERE id_questao = ?", Integer.class, idQuestao);
         return count != null && count > 0;
+    }
+
+    // Soma dos valores das questões da avaliação, ignorando uma questão
+    public BigDecimal somarValoresExceto(Long idAvaliacao, Long idQuestaoIgnorada) {
+        BigDecimal soma = jdbcTemplate.queryForObject(
+            "SELECT COALESCE(SUM(valor), 0) FROM avaliacao_questao WHERE id_avaliacao = ? AND id_questao <> ?",
+            BigDecimal.class, idAvaliacao, idQuestaoIgnorada);
+        return soma == null ? BigDecimal.ZERO : soma;
+    }
+
+    // Trava a linha da avaliação até o fim da transação: duas requisições
+    // simultâneas não conseguem ultrapassar o limite juntas.
+    public void travarAvaliacao(Long idAvaliacao) {
+        jdbcTemplate.queryForObject(
+            "SELECT id_avaliacao FROM avaliacao WHERE id_avaliacao = ? FOR UPDATE", Long.class, idAvaliacao);
     }
 }
