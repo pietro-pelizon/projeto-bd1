@@ -5,6 +5,11 @@ import AvaliacoesScreen from '../src/screens/AvaliacoesScreen';
 import QuestoesScreen from '../src/screens/QuestoesScreen';
 import RelatoriosScreen from '../src/screens/RelatoriosScreen';
 import UsuariosScreen from '../src/screens/UsuariosScreen';
+import Shell from '../src/Shell';
+
+export default function Home(){
+  return <Shell />;
+  }
 
 type Aba = 'relatorios' | 'usuarios' | 'questoes' | 'avaliacoes' | 'atribuicoes';
 
@@ -15,43 +20,6 @@ const ABAS: { id: Aba; titulo: string }[] = [
   { id: 'avaliacoes', titulo: 'Avaliações' },
   { id: 'atribuicoes', titulo: 'Atribuições & Respostas' },
 ];
-
-export default function Home() {
-  const [aba, setAba] = useState<Aba>('relatorios');
-
-  return (
-    <View style={s.page}>
-      <View style={s.header}>
-        <View style={s.container}>
-          <Text style={s.titulo}>Sistema de Avaliações — BD UEL</Text>
-          <View style={s.tabs}>
-            {ABAS.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                onPress={() => setAba(item.id)}
-                style={[s.tab, aba === item.id && s.tabAtiva]}
-              >
-                <Text style={[s.tabTexto, aba === item.id && s.tabTextoAtivo]}>
-                  {item.titulo}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={s.scroll}>
-        <View style={s.container}>
-          {aba === 'relatorios' && <RelatoriosScreen />}
-          {aba === 'usuarios' && <UsuariosScreen />}
-          {aba === 'questoes' && <QuestoesScreen />}
-          {aba === 'avaliacoes' && <AvaliacoesScreen />}
-          {aba === 'atribuicoes' && <AtribuicoesRespostasScreen />}
-        </View>
-      </ScrollView>
-    </View>
-  );
-}
 
 const s = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#F1F5F9' },
